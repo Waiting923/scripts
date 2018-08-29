@@ -9,3 +9,4 @@ else
 		do parted /dev/sd$i -s -- mklabel gpt mkpart KOLLA_CEPH_OSD_CACHE_BOOTSTRAP 1 -1
 	done
 fi
+#use to mklabel on disks or partes
