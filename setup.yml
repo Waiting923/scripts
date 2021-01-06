@@ -1,0 +1,118 @@
+---
+- name: system setup
+  hosts: all
+  tags: system
+  tasks:
+  - name: setenforce 0
+    shell: "setenforce 0"
+
+  - name: disable selinux
+    replace:
+      path: /etc/selinux/config
+      regexp: '^SELINUX=enforcing'
+      replace: 'SELINUX=disabled'
+
+  - name: stop firewalld
+    service:
+      name: firewalld
+      state: stopped
+      enabled: no
+ 
+- name: yum repo file copy
+  hosts: all
+  tags: copy_repo
+  tasks:
+    - name: backup yum repo
+      shell: "mv /etc/yum.repos.d /etc/yum.repos.d.bak/"
+
+    - name: make new dir
+      shell: "mkdir /etc/yum.repos.d" 
+
+    - name: copy yum repo file
+      template:
+        src: /root/workspace/rpm/local.repo.j2
+        dest: /etc/yum.repos.d/local.repo
+        mode: 0600
+
+- name: base packages install
+  hosts: all
+  tags: yum_install
+  tasks:
+    - name: yum install base packages
+      yum: name={{ item }}
+      with_items:
+        - epel-release
+        - python-pip
+        - python-devel
+        - python3
+        - libffi-devel
+        - gcc
+        - openssl-devel
+        - vim
+        - net-tools
+        - wget
+        - docker-ce
+
+- name: deploy node base pip packages install
+  hosts: deploy
+  tags: deploy_pip_install
+  tasks:
+    - name: pip install base packages
+      shell: bash /root/workspace/pip/pip-install.sh
+
+- name: other node base pip packages install
+  hosts: node
+  tags: node_pip_install
+  tasks:
+    - name: copy pip packages
+      copy: 
+        src: /root/workspace/pip/docker
+        dest: /root
+
+    - name: install pip packages
+      shell: bash /root/docker/pip-install.sh
+
+- name: docker config
+  hosts: all
+  tags: docker
+  tasks:
+    - name: start docker service
+      service:
+        name: docker
+        state: started
+
+    - name: copy docker daemon.json
+      template:
+        src: /root/workspace/registry/daemon.json.j2
+        dest: /etc/docker/daemon.json
+
+    - name: restart docker service
+      service:
+        name: docker
+        state: restarted
+
+- name: docker registry setup
+  hosts: deploy
+  tags: registry
+  tasks:
+    - name: config docker registry
+      shell: bash /root/workspace/registry/registry_setup.sh
+
+- name: kolla-ansible config setup
+  hosts: deploy
+  tags: kolla_config
+  tasks:
+    - name: copy multinode
+      shell: cp /usr/share/kolla-ansible/ansible/inventory/multinode /root/workspace
+
+    - name: copy kolla config file
+      shell: cp -r /usr/share/kolla-ansible/etc_examples/kolla/ /etc/
+
+    - name: passwords.yml init
+      shell: kolla-genpwd
+
+    - name: config globals.yml
+      copy:
+        src: /root/workspace/globals.yml.j2
+        dest: /etc/kolla/globals.yml
+        mode: 0644
