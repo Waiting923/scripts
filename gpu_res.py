@@ -1,5 +1,9 @@
 #!/usr/bin/python
+#date: 2021.04.01
+#author: wangzihao
+#function: statistical resources for gpu
 #-*- coding: utf-8 -*-
+import argparse
 import ConfigParser
 from novaclient import client
 from keystoneauth1 import session
@@ -10,7 +14,7 @@ import sys
 
 
 class gpu_resources():
-    
+ 
     def __init__(self):
         self.OS_USER_DOMAIN_NAME = getenv('OS_USER_DOMAIN_NAME')
         self.OS_USERNAME = getenv('OS_USERNAME')
@@ -19,14 +23,19 @@ class gpu_resources():
         self.OS_PROJECT_NAME = getenv('OS_PROJECT_NAME')
         self.OS_AUTH_URL = getenv('OS_AUTH_URL')
         self.OS_REGION_NAME = getenv('OS_REGION_NAME')
-        self.gpu_type = sys.argv[1]
-    
+
     def cfg(self):
         conf = ConfigParser.ConfigParser()
         conf.read('gpu.conf')
         self.flavor_ids = conf.get("flavor", self.gpu_type + "_flavor").split(',')
         self.aggregate_id = int(conf.get("aggregates", self.gpu_type + "_aggregates"))
+        self.total_num = int(conf.get("total", self.gpu_type + "_num"))
 
+    def get_args(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument("gpu_type", help="include RTX1080,P100,V100S")
+        args = parser.parse_args()
+        self.gpu_type = args.gpu_type
 
     def keystone_auth(self):
         auth = v3.Password(user_domain_name=self.OS_USER_DOMAIN_NAME,
@@ -48,7 +57,7 @@ class gpu_resources():
         for gpu_host in self.gpu_hosts:
             flavor_gpu_num = 1
             sum_host_gpu_num = 0
-            print("-------\n{:<}".format(gpu_host))
+            print(format(gpu_host, "-^100"))
             for flavor_id in self.flavor_ids:
                 instance_list = self.nova.servers.list(search_opts={'flavor':flavor_id, 'all_tenants':True, 'host':str(gpu_host)})
                 instance_list = [instance for instance in instance_list if instance.status != 'ERROR']
@@ -60,10 +69,11 @@ class gpu_resources():
                 all_gpu_num += host_gpu_num
                 flavor_gpu_num = flavor_gpu_num * 2
             print("used {:<}\n".format(sum_host_gpu_num))
-        print("ALL USED: " + str(all_gpu_num))
+        print("ALL USED: " + str(all_gpu_num) + "/" + str(self.total_num))
 
     def main(self):
         #pdb.set_trace()
+        self.get_args()
         self.cfg()
         self.keystone_auth()
         self.nova_client()
