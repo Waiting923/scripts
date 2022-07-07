@@ -1,0 +1,25 @@
+---
+- hosts: all
+  gather_facts: yes
+  remote_user: root
+  tasks:
+    - set_fact:
+        addr: "{{ ansible_default_ipv4.address.split('.')[-1] }}" 
+    
+    - name: ipmitool change mgr addresses
+      shell: |
+        ipmitool lan set 1 ipaddr 10.252.174.{{ addr }}
+        ipmitool lan set 1 defgw ipaddr 10.252.174.1
+      when: inventory_hostname in groups['mgr']
+    
+    - name: ipmitool change az1 addresses
+      shell: |
+        ipmitool lan set 1 ipaddr 10.252.160.{{ addr }}
+        ipmitool lan set 1 defgw ipaddr 10.252.160.1
+      when: inventory_hostname in groups['az1']
+    
+    - name: check ipmiaddr
+      shell: ipmitool lan print 1 | grep -e 'IP Address' -e 'Default Gateway IP'
+      register: ipmiaddr
+    
+    - debug: var=ipmiaddr.stdout_lines
