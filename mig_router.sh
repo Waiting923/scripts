@@ -1,6 +1,6 @@
 #!/bin/bash
-AGENT_1=''
-AGENT_2=''
+AGENT_2='169606c4-c0a7-4cd8-ac8a-627ffee42e4e'
+AGENT_1='363f6c14-9e8d-45b9-9c8d-b376432e5dcb'
 LOCAL_AGENT=$AGENT_1
 REMOTE_AGENT=$AGENT_2
 ROUTERS=$(cat ./router-list)
@@ -12,7 +12,7 @@ function ha_link_set() {
 }
 
 function move_active() {
-    if [ $REMOTE_AGENT == $STANDBY_HOST ]
+    if [[ $REMOTE_AGENT == $STANDBY_HOST ]]
     then
       echo "err: $1 need choose another host to migrate"
     else
@@ -23,7 +23,7 @@ function move_active() {
 }
 
 function move_standby() {
-    if [ $REMOTE_AGENT == $ACTIVE_HOST ]
+    if [[ $REMOTE_AGENT == $ACTIVE_HOST ]]
     then
       echo "err: $1 need choose another host to migrate"
     else
@@ -33,11 +33,11 @@ function move_standby() {
 }
 
 function operation() {
-    RESULT=$(neutron l3-agent-list-hosting-router $1 -f value -c id -c ha_state)
-    RESULT_ACTIVE=$(echo $RESULT | grep $LOCAL_AGENT | grep -o "active")
-    RESULT_STANDBY=$(echo $RESULT | grep $LOCAL_AGENT | grep -o "standby")
-    ACTIVE_HOST=$(echo $RESULT | grep active | awk '{print $1}')
-    STANDBY_HOST=$(echo $RESULT | grep standby | awk '{print $1}')
+    neutron l3-agent-list-hosting-router $1 -f value -c id -c ha_state > RESULT
+    RESULT_ACTIVE=$(cat RESULT | grep $LOCAL_AGENT | grep -o "active")
+    RESULT_STANDBY=$(cat RESULT | grep $LOCAL_AGENT | grep -o "standby")
+    ACTIVE_HOST=$(cat RESULT | grep active | awk '{print $1}')
+    STANDBY_HOST=$(cat RESULT | grep standby | awk '{print $1}')
     if [ $RESULT_ACTIVE ];then
         echo "active"
         move_active $1
