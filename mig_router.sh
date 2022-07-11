@@ -1,6 +1,7 @@
 #!/bin/bash
-AGENT_2='169606c4-c0a7-4cd8-ac8a-627ffee42e4e'
-AGENT_1='363f6c14-9e8d-45b9-9c8d-b376432e5dcb'
+AGENT_1='169606c4-c0a7-4cd8-ac8a-627ffee42e4e'
+AGENT_2='a5877d24-0c38-4c75-b7d7-b7aaee2c1fc7'
+AGENT_3='363f6c14-9e8d-45b9-9c8d-b376432e5dcb'
 LOCAL_AGENT=$AGENT_1
 REMOTE_AGENT=$AGENT_2
 ROUTERS=$(cat ./router-list)
@@ -14,7 +15,11 @@ function ha_link_set() {
 function move_active() {
     if [[ $REMOTE_AGENT == $STANDBY_HOST ]]
     then
-      echo "err: $1 need choose another host to migrate"
+      local REMOTE_AGENT=$AGENT_3
+      echo "warn: $1 switch to $REMOTE_AGENT migrate"
+      ha_link_set $1
+      neutron l3-agent-router-remove $LOCAL_AGENT $1
+      neutron l3-agent-router-add $REMOTE_AGENT $1
     else
       ha_link_set $1
       neutron l3-agent-router-remove $LOCAL_AGENT $1
@@ -25,7 +30,10 @@ function move_active() {
 function move_standby() {
     if [[ $REMOTE_AGENT == $ACTIVE_HOST ]]
     then
-      echo "err: $1 need choose another host to migrate"
+      local REMOTE_AGENT=$AGENT_3
+      echo "warn: $1 switch to $REMOTE_AGENT migrate"
+      neutron l3-agent-router-remove $LOCAL_AGENT $1
+      neutron l3-agent-router-add $REMOTE_AGENT $1
     else
       neutron l3-agent-router-remove $LOCAL_AGENT $1
       neutron l3-agent-router-add $REMOTE_AGENT $1
