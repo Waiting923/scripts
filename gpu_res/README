@@ -1,0 +1,3 @@
+#Usage: python gpu_res.py {GPU_TYPE} -h --help 
+#GPU_TYPE: P100, RTX1080, V100S
+#flavor_id and aggregates_id of every gpu types edit in gpu.conf
