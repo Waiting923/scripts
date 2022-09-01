@@ -5,6 +5,8 @@
 ```
 ansible-playbook -i inventory -t init site.yml
 ```
+- 重启
+- 安装驱动
 - worker加入k8s
 ```
 ansible-playbook -i inventory -t worker site.yml
