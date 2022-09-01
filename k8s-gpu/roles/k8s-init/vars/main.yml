@@ -1,0 +1,12 @@
+---
+# vars file for k8s-init
+#lvm vars
+data_disk_name: /dev/nvme0n1
+vg_name: vg1
+docker_lv_name: docker
+data_lv_name: data
+docker_lv_size: 500G
+data_lv_size: 100%FREE
+
+#chrony
+ntp_servers: "10.4.62.19"

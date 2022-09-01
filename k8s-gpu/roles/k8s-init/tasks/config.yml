@@ -1,0 +1,43 @@
+---
+- name: copy docker.service
+  template: src=docker.service.j2 dest=/usr/lib/systemd/system/docker.service
+
+- name: create dir /etc/systemd/system/docker.service.d/
+  file: 
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    mode: 755
+
+- name: copy docker.service.d.conf.j2
+  template: src=docker.service.d.conf.j2 dest=/etc/systemd/system/docker.service.d/proxy.conf mode=0644
+
+- name: systemctl daemon-reload
+  shell: systemctl daemon-reload
+
+- name: copy daemon.json.j2
+  template: src=daemon.json.j2 dest=/etc/docker/daemon.json mode=0644
+
+- name: restart docker service
+  service: name=docker state=restarted enabled=yes
+
+- name: install chrony
+  apt: name=chrony state=latest
+
+- name: copy chrony.conf
+  template: src=chrony.conf.j2 dest=/etc/chrony/chrony.conf
+
+- name: start chronyd service
+  service: name=chronyd enabled=yes state=restarted
+
+- name: ulimit -S -H -n 65535
+  shell: "ulimit -S -H -n 65535"
+
+- name: copy ulimit conf
+  copy: src=limit.k8s.conf dest=/etc/security/limits.d/k8s.conf mode=0644
+
+- name: copy sysctl conf
+  copy: src=sysctl.conf dest=/etc/sysctl.conf mode=0644
+
+- name: sysctl init
+  shell: sysctl -p
+

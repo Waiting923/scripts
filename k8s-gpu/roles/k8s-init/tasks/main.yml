@@ -1,0 +1,6 @@
+---
+# tasks file for k8s-init
+#- include_tasks: apt.yml
+#- include_tasks: lvm.yml
+#- include_tasks: gpu.yml
+- include_tasks: config.yml

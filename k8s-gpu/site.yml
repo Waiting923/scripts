@@ -1,0 +1,12 @@
+---
+- name: k8s gpu init
+  hosts: k8s_gpu
+  tags: gpu
+  roles:
+    - k8s-init 
+
+- name: k8s add worker
+  hosts: k8s_gpu
+  tags: worker
+  roles:
+    - k8s-worker 

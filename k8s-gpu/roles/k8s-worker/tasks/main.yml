@@ -1,0 +1,2 @@
+---
+- include: k8s-add-worker.yml

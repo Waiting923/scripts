@@ -1,0 +1,18 @@
+---
+- debug: var=ansible_bz.ipv4.address
+
+- debug: var=ansible_mt.ipv4.address
+
+- name: docker run
+  shell: docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run  harbor-ai.xxx.io/rancher/rancher-agent:v2.6.4 --server https://rancher-ai.xxx.io --token hrljdkcf26jgf9rz8mgkfshkldkrcxb9sfp6mmjcf7zz7jpzqdhfxt --ca-checksum 54f701e380a83ad792884f84b038f4172f51759eadff4387c6fa2a688811c84b --worker --label node.xxx.com/cache-type=nvme --label node.xxx.com/model=3090 --label node.xxx.com/type=gpu --label node.xxx.com/role=worker --address={{ ansible_mt.ipv4.address }} --internal-address={{ ansible_bz.ipv4.address }}
+
+- name: Waiting the kubernetes dir created
+  stat:
+    path: "/etc/kubernetes/"
+  register: dir_stat
+  retries: 10
+  delay: 10
+  until: dir_stat.stat.exists
+
+- name: copy kubelet.conf
+  copy: src=kubelelet-config.yaml dest=/etc/kubernetes/ mode=0644

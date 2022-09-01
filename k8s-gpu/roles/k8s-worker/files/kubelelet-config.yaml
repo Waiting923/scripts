@@ -1,0 +1,29 @@
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+enableServer: true
+registerNode: true
+cgroupDriver: systemd
+address: 0.0.0.0
+port: 10250
+maxPods: 64
+resolvConf: "/etc/resolv.conf"
+containerLogMaxSize: 100Mi
+containerLogMaxFiles: 5
+systemReserved:
+  cpu: 1000m
+  memory: 4Gi
+kubeReserved:
+  cpu: 2000m
+  memory: 4Gi
+evictionHard:
+  memory.available: "300Mi"
+  nodefs.available: "10%"
+runtimeRequestTimeout: 10m
+nodeStatusUpdateFrequency: 5s
+serializeImagePulls: false
+kubeAPIQPS: 20
+kubeAPIBurst: 40
+registryPullQPS: 10
+registryBurst: 20
+eventRecordQPS: 10
+eventBurst: 20

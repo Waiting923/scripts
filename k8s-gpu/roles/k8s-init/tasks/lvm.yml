@@ -1,0 +1,52 @@
+---
+- name: Create pv
+  parted: device={{ data_disk_name }} number=1 state=present label=gpt
+
+- name: Create vg
+  lvg: vg={{ vg_name }} pvs={{ data_disk_name }}p1
+
+- name: Create docker lv
+  lvol: vg={{ vg_name }} lv={{ docker_lv_name }} size={{ docker_lv_size }}
+
+- name: Create data lv
+  lvol: vg={{ vg_name }} lv={{ data_lv_name }} size={{ data_lv_size }}
+  when: data_lv_size is defined
+
+- name: Format docker lvm
+  filesystem: fstype=xfs dev=/dev/{{ vg_name }}/{{ docker_lv_name }}
+
+- name: Format data lvm
+  filesystem: fstype=xfs dev=/dev/{{ vg_name }}/{{ data_lv_name }}
+  when: data_lv_size is defined
+
+- name: Create mount dir
+  file: path={{ item }} state=directory
+  loop:
+    - /docker
+    - /data
+    - /dataset
+
+- name: Mount docker and data
+  mount:
+    path: "{{ item.path }}"
+    src: "{{ item.src }}"
+    fstype: xfs
+    opts: rw,pquota
+    state: mounted
+  with_items:
+    - { path: "/data", src: "/dev/mapper/vg1-data" }
+    - { path: "/docker", src: "/dev/mapper/vg1-docker" }
+
+- name: copy ceph conf
+  copy: src=ceph.conf dest=/etc/ceph/ mode=0644
+
+- name: copy forcestack keyring
+  copy: src=ceph.client.forcestack.keyring dest=/etc/ceph/ mode=0644
+
+- name: Mount cephfs
+  mount:
+    src: "100.71.50.151:6789,100.71.50.152:6789,100.71.50.153:6789:/dataset"
+    path: /dataset
+    fstype: ceph
+    opts: rw,name=forcestack,noatime,_netdev
+    state: mounted
