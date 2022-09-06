@@ -13,7 +13,7 @@
         replace:  '\1 intel_iommu=on iommu=pt\2'
     
     - name: grub2 mkconfig
-      shell: grub2-mkconfig -o /boot/grub2/grub
+      shell: grub2-mkconfig -o /boot/grub2/grub.cfg
     
     - name: config blacklist.conf
       lineinfile:
