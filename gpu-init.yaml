@@ -1,0 +1,48 @@
+---
+- name: init cloud gpu config
+  hosts: all
+  remote_user: root
+  vars:
+    gpu_id: "10de:2204"
+    audio_id: "10de:1aef"
+  tasks:
+    - name: config grub iommu
+      replace:
+        path: /etc/default/grub
+        regexp: '(.*crashkernel=auto+)(.*)'
+        replace:  '\1 intel_iommu=on iommu=pt\2'
+    
+    - name: grub2 mkconfig
+      shell: grub2-mkconfig -o /boot/grub2/grub
+    
+    - name: config blacklist.conf
+      lineinfile:
+        path: /etc/modprobe.d/blacklist.conf
+        line: "{{ item }}"
+        create: yes
+      loop:
+        - "blacklist nouveau"
+        - "options nouveau modset=0"
+
+    - name: backup initramfs
+      shell: mv /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r)-nouveau.img
+
+    - name: create new initramfs
+      shell: dracut /boot/initramfs-$(uname -r).img $(uname -r)
+  
+    - name: load vfio module
+      lineinfile:
+        path: /etc/modules-load.d/vfio.conf
+        line: "{{ item }}"
+        create: yes
+      loop:
+        - "vfio"
+        - "vfio-pci"
+        - "vfio_iommu_type1"
+        - "br_netfilter"
+
+    - name: add gpu to vfio
+      lineinfile:
+        path: /etc/modprobe.d/vfio.conf
+        line: options vfio-pci ids={{ gpu_id }},{{ audio_id }}
+        create: yes
