@@ -24,7 +24,7 @@ if ($fromhost-ip == '$IP1' or $fromhost-ip == '$IP2') and $msg contains '[高可
 
 - 调整sleep时间，调整检测间隔
 
-[fw-cutcheck.sh]()
+[fw-cutcheck.sh](https://github.com/Riverdd/scripts/blob/master/fw-cutcheck/check-fw.sh)
 
 - igw组配置igw地址，igw登陆用户，igw登陆密码
 
@@ -34,14 +34,14 @@ if ($fromhost-ip == '$IP1' or $fromhost-ip == '$IP2') and $msg contains '[高可
 
 - 若有多套fw，则定义多个$VIP组
 
-[fw.ini]()
+[fw.ini](https://github.com/Riverdd/scripts/blob/master/fw-cutcheck/fw.ini)
 
 
 ## 配置fw-cutcheck.service
 
 - ExecStart配置为脚本执行绝对路径
 
-[fw-cutcheck.service]()
+[fw-cutcheck.service](https://github.com/Riverdd/scripts/blob/master/fw-cutcheck/fw-cutcheck.service)
 
 
 ## 服务使用
