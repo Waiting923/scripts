@@ -1,0 +1,10 @@
+[Unit]
+Description=firewall cut check
+After=rsyslog.service
+
+[Service]
+Type=simple
+ExecStart=/opt/fw-cutcheck/check-fw.sh
+
+[Install]
+WantedBy=multi-user.target
