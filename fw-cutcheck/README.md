@@ -22,6 +22,8 @@ if ($fromhost-ip == '$IP1' or $fromhost-ip == '$IP2') and $msg contains '[高可
 
 - 修改$log_dir与rsyslog配置保持一致
 
+- 修改$config_file为fw.ini绝对路径
+
 - 调整sleep时间，调整检测间隔
 
 [fw-cutcheck.sh](https://github.com/Riverdd/scripts/blob/master/fw-cutcheck/check-fw.sh)
