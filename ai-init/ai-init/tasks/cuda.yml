@@ -1,0 +1,73 @@
+---
+- name: purging nvidia packages
+  apt:
+    name: nvidia*
+    state: absent
+    purge: yes
+
+- name: purging nouveau
+  modprobe:
+    name: nouveau
+    state: absent
+
+- name: disable nouveau
+  copy: src=nvidia-installer-disable-nouveau.conf dest=/etc/modprobe.d/nvidia-installer-disable-nouveau.conf
+
+- name: update-initramfs
+  shell: update-initramfs -u
+
+- name: installing packages {{ packages }}
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - gcc
+      - make
+      - dkms
+
+- name: check cuda version
+  command: find /usr/local/ -type d -name cuda-12.6
+  register: cuda_version
+
+- name: deploy cuda12 env
+  ignore_errors: true
+  block:
+   - name: install cuda
+     command: bash /mnt/ddn/cuda_12.6.2_560.35.03_linux.run --silent
+  when: "'cuda-12.6' not in cuda_version.stdout"
+
+- name: check nvidia version
+  command: find /usr/src/  -type d -name nvidia-560.35.03
+  register: nvidia_version
+
+- name: Update PATH variable
+  lineinfile:
+    path: /etc/environment
+    regex: '^PATH='
+    line: "PATH=/usr/local/cuda/bin:{{ lookup('env', 'PATH') }}"
+    state: present
+
+- name: Update LD_LIBRARY_PATH variable
+  lineinfile:
+    path: /etc/environment
+    regex: '^LD_LIBRARY_PATH='
+    line: "LD_LIBRARY_PATH=/usr/local/cuda/targets/x86_64-linux/lib/:{{ lookup('env', 'LD_LIBRARY_PATH') }}"
+    state: present
+
+- name: check nvlink status
+  command: nvidia-smi -L
+  register: nvlink_status
+
+- name: deploy nvidia fabricmanager
+  ignore_errors: true
+  block:
+    - name: install nvidia fabricmanager
+      command: dpkg -i /mnt/ddn/nvidia-fabricmanager-560_560.35.03-1_amd64.deb
+
+    - name: Start nvidia fabricmanager
+      service:
+        name: nvidia-fabricmanager
+        daemon_reload: true
+        state: started
+        enabled: yes
+  when: "'RTX' not in nvlink_status.stdout"

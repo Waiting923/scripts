@@ -1,0 +1,5 @@
+---
+- name: ai host init
+  hosts: all
+  roles: 
+    - ai-init

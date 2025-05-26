@@ -1,0 +1,7 @@
+---
+- import_tasks: cuda.yml
+  tags: cuda
+- import_tasks: docker.yml
+  tags: docker
+- import_tasks: toolkit.yml
+  tags: toolkit

@@ -1,0 +1,64 @@
+---
+- name: clean old packages
+  ignore_errors: true
+  apt:
+    pkg:
+    - docker.io
+    - docker-doc
+    - docker-compose
+    - docker-compose-v2
+    - podman-docker
+    - containerd
+    - runc
+    - docker-ce
+    state: absent
+
+- name: install base packages
+  apt:
+    pkg:
+    - ca-certificates
+    - curl
+    - apt-transport-https
+    - software-properties-common
+    state: latest
+    update_cache: yes
+
+    #- name: add docker offical gpg key
+    #  shell: |
+    #    install -m 0755 -d /etc/apt/keyrings
+    # curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    # chmod a+r /etc/apt/keyrings/docker.asc
+    # echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/nul
+    # curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    # echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+- name: init keyrings
+  shell: "install -m 0755 -d /etc/apt/keyrings"
+
+- name: copy keyrings
+  copy: src=docker.asc dest=/etc/apt/keyrings/docker.asc
+
+- name: copy gpg keyrings
+  copy: src=docker-archive-keyring.gpg dest=/usr/share/keyrings/docker-archive-keyring.gpg
+
+- name: copy docker sources list
+  copy: src=docker.list dest=/etc/apt/sources.list.d/docker.list
+
+- name: update apt cache
+  apt: update_cache=yes
+
+- name: install docker packages
+  apt:
+    pkg:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-buildx-plugin
+    - docker-compose-plugin
+    state: latest
+
+- name: start docker service
+  systemd: 
+    name: docker
+    state: started
+    enabled: true
