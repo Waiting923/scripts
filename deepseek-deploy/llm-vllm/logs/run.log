@@ -1,0 +1,19 @@
+ start node1 ...
+2025-02-21 04:47:16,316	INFO usage_lib.py:467 -- Usage stats collection is enabled by default without user confirmation because this terminal is detected to be non-interactive. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+2025-02-21 04:47:16,316	INFO scripts.py:823 -- Local node IP: 10.83.0.21
+2025-02-21 04:47:17,608	SUCC scripts.py:860 -- --------------------
+2025-02-21 04:47:17,608	SUCC scripts.py:861 -- Ray runtime started.
+2025-02-21 04:47:17,608	SUCC scripts.py:862 -- --------------------
+2025-02-21 04:47:17,608	INFO scripts.py:864 -- Next steps
+2025-02-21 04:47:17,609	INFO scripts.py:867 -- To add another node to this Ray cluster, run
+2025-02-21 04:47:17,609	INFO scripts.py:870 --   ray start --address='10.83.0.21:6379'
+2025-02-21 04:47:17,609	INFO scripts.py:879 -- To connect to this Ray cluster:
+2025-02-21 04:47:17,609	INFO scripts.py:881 -- import ray
+2025-02-21 04:47:17,609	INFO scripts.py:882 -- ray.init()
+2025-02-21 04:47:17,609	INFO scripts.py:913 -- To terminate the Ray runtime, run
+2025-02-21 04:47:17,609	INFO scripts.py:914 --   ray stop
+2025-02-21 04:47:17,609	INFO scripts.py:917 -- To view the status of the cluster, use
+2025-02-21 04:47:17,609	INFO scripts.py:918 --   ray status
+2025-02-21 04:47:17,609	INFO scripts.py:1031 -- --block
+2025-02-21 04:47:17,609	INFO scripts.py:1032 -- This command will now block forever until terminated by a signal.
+2025-02-21 04:47:17,609	INFO scripts.py:1035 -- Running subprocesses are monitored and a message will be printed if any of them terminate unexpectedly. Subprocesses exit with SIGTERM will be treated as graceful, thus NOT reported.

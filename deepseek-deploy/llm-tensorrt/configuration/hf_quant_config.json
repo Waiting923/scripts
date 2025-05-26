@@ -1,0 +1,6 @@
+{
+  "quantization": {
+    "quant_algo": "FP8_BLOCK_SCALES",
+    "kv_cache_quant_algo": null
+  }
+}

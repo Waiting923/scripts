@@ -1,0 +1,6 @@
+Host *
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+    Port 2233
+    User root
+    IdentityFile ~/.ssh/id_rsa 
